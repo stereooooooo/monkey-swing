@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Monkey Swing Game</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; margin: 0 auto; }
+  </style>
+</head>
+<body>
+<script>
+const config = {
+    type: Phaser.AUTO,
+    width: 800,
+    height: 600,
+    backgroundColor: '#87CEEB',
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 1000 },
+            debug: false
+        }
+    },
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    }
+};
+
+let monkey;
+let cursors;
+let vines;
+let fruits;
+let ground;
+let lives = 3;
+let score = 0;
+
+const game = new Phaser.Game(config);
+
+function preload() {
+    this.load.image('monkey', 'https://i.imgur.com/QZ7BLJy.png'); // Placeholder image
+    this.load.image('vine', 'https://i.imgur.com/0XKznXG.png'); // Placeholder vine
+    this.load.image('fruit', 'https://i.imgur.com/NXnW6g9.png'); // Placeholder fruit
+    this.load.image('ground', 'https://i.imgur.com/OuJm7bX.png'); // Placeholder ground
+}
+
+function create() {
+    monkey = this.physics.add.sprite(100, 450, 'monkey').setScale(0.2);
+    monkey.setCollideWorldBounds(true);
+
+    ground = this.physics.add.staticGroup();
+    ground.create(400, 580, 'ground').setScale(2).refreshBody();
+
+    vines = this.physics.add.group({
+        immovable: true,
+        allowGravity: false
+    });
+
+    // Create vines across the screen
+    for (let i = 200; i < 800; i += 200) {
+        vines.create(i, 300, 'vine').setScale(0.5);
+    }
+
+    fruits = this.physics.add.group();
+    spawnFruit(this);
+
+    this.physics.add.collider(monkey, ground, hitGround, null, this);
+    this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
+
+    cursors = this.input.keyboard.createCursorKeys();
+}
+
+function update() {
+    if (cursors.left.isDown) {
+        monkey.setVelocityX(-160);
+    } else if (cursors.right.isDown) {
+        monkey.setVelocityX(160);
+    } else {
+        monkey.setVelocityX(0);
+    }
+
+    if (cursors.space.isDown && monkey.body.touching.down) {
+        monkey.setVelocityY(-500); // Jump
+    }
+}
+
+function spawnFruit(scene) {
+    for (let i = 250; i < 800; i += 200) {
+        let fruit = fruits.create(i, 200, 'fruit').setScale(0.1);
+    }
+}
+
+function hitGround(monkey, ground) {
+    lives--;
+    if (lives <= 0) {
+        alert('Game Over!');
+        location.reload();
+    } else {
+        monkey.setPosition(100, 450);
+    }
+}
+
+function collectFruit(monkey, fruit) {
+    fruit.disableBody(true, true);
+    score += 10;
+}
+</script>
+</body>
+</html>
