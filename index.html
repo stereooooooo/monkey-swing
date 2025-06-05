@@ -20,7 +20,7 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 800 },
-            debug: false
+            debug: false // Set to true for debugging physics bodies
         }
     },
     scene: {
@@ -34,13 +34,18 @@ let monkey;
 let cursors;
 let vines;
 let fruits;
-let ground;
+let ground; // This group will contain the thorns
 let lives = 3;
 let score = 0;
+// It's good practice to also have text objects for lives and score display
+// let livesText;
+// let scoreText;
 
 const game = new Phaser.Game(config);
 
 function preload() {
+    // Make sure these files are in the same directory as your HTML
+    // or update paths accordingly (e.g., 'assets/monkey.png')
     this.load.image('monkey', 'monkey.png');
     this.load.image('vine', 'vine.png');
     this.load.image('banana', 'banana.png');
@@ -51,28 +56,32 @@ function create() {
     monkey = this.physics.add.sprite(200, 50, 'monkey').setScale(0.15);
     monkey.setCollideWorldBounds(true);
 
-    ground = this.physics.add.staticGroup();
+    ground = this.physics.add.staticGroup(); // Group for thornsy
 
     // Add thorns at multiple levels
-    addThorns(this, 580);
-    addThorns(this, 380);
-    addThorns(this, 180);
+    addThorns(this, 580); // Bottom level thorns
+    addThorns(this, 380); // Middle level thorns
+    addThorns(this, 180); // Top level thorns (below first vines)
 
     vines = this.physics.add.staticGroup();
 
     // Vines at the top of each level
-    addVines(this, 100);
-    addVines(this, 300);
-    addVines(this, 500);
+    addVines(this, 100); // Top-most vines (monkey should land here first)
+    addVines(this, 300); // Middle vines
+    addVines(this, 500); // Bottom vines
 
     fruits = this.physics.add.group();
     spawnFruits(this);
 
     this.physics.add.collider(monkey, vines); // Monkey can land on vines
-    this.physics.add.collider(monkey, ground, hitGround, null, this);
+    this.physics.add.collider(monkey, ground, hitGround, null, this); // Monkey hits thorns
     this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
 
     cursors = this.input.keyboard.createCursorKeys();
+
+    // Example to display lives and score (optional, but good for players)
+    // livesText = this.add.text(16, 16, 'Lives: 3', { fontSize: '32px', fill: '#000' });
+    // scoreText = this.add.text(16, 50, 'Score: 0', { fontSize: '32px', fill: '#000' });
 }
 
 function update() {
@@ -84,13 +93,14 @@ function update() {
         monkey.setVelocityX(0);
     }
 
+    // Allow jump only if touching something below (vine or ground)
     if (cursors.space.isDown && monkey.body.touching.down) {
-        monkey.setVelocityY(-500); // Jump
+        monkey.setVelocityY(-500); // Jump strength
     }
 }
 
 function spawnFruits(scene) {
-    // Bananas placed near vines
+    // Bananas placed near vines (slightly above them)
     fruits.create(200, 80, 'banana').setScale(0.2);
     fruits.create(500, 80, 'banana').setScale(0.2);
     fruits.create(200, 280, 'banana').setScale(0.2);
@@ -100,35 +110,43 @@ function spawnFruits(scene) {
 }
 
 function addThorns(scene, y) {
-    for (let x = 100; x <= 800; x += 200) {
+    for (let x = 0; x <= 800; x += 100) { // Spread thorns more continuously
         ground.create(x, y, 'thorns').setScale(0.5).refreshBody();
     }
 }
 
 function addVines(scene, y) {
-    for (let x = 200; x <= 800; x += 300) {
-        vines.create(x, y, 'vine').setScale(0.2);
+    for (let x = 200; x <= 600; x += 200) { // Adjusted spacing for example
+        vines.create(x, y, 'vine').setScale(0.2).refreshBody(); // Critical Fix!
     }
 }
 
-function hitGround(monkey, ground) {
+function hitGround(monkey, thorn) { // Changed 'ground' to 'thorn' for clarity
     lives--;
+    // if (livesText) livesText.setText('Lives: ' + lives); // Update lives display
+
     if (lives <= 0) {
         alert('Game Over!');
-        location.reload();
+        // this.scene.restart(); // Better than location.reload() for a Phaser game
+        location.reload(); // Reloads the entire page
     } else {
+        // Reset monkey to the start of the first level
         monkey.setPosition(200, 50);
+        monkey.setVelocity(0,0); // Stop any residual movement
     }
 }
 
 function collectFruit(monkey, fruit) {
-    fruit.disableBody(true, true);
+    fruit.disableBody(true, true); // Fruit disappears
     score += 10;
+    // if (scoreText) scoreText.setText('Score: ' + score); // Update score display
 
     // Check if all fruits are collected
     if (fruits.countActive(true) === 0) {
         alert('You Win! Welcome to the Treasure Room!');
-        // Replace with transition to treasure room later
+        // Later, you can transition to a new scene here:
+        // this.scene.start('treasureRoomScene');
+        location.reload(); // For now, just restart
     }
 }
 </script>
