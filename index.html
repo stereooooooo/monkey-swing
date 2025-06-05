@@ -19,7 +19,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 1000 },
+            gravity: { y: 800 },
             debug: false
         }
     },
@@ -41,31 +41,35 @@ let score = 0;
 const game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('monkey', 'monkey.png'); // Monkey
-    this.load.image('vine', 'vine.png'); // Placeholder vine
-    this.load.image('fruit', 'fruit.png'); // Placeholder fruit
-    this.load.image('ground', 'ground.png'); // Placeholder ground
+    this.load.image('monkey', 'monkey.png');
+    this.load.image('vine', 'vine.png');
+    this.load.image('banana', 'banana.png');
+    this.load.image('thorns', 'thorns.png');
 }
 
 function create() {
-    monkey = this.physics.add.sprite(100, 450, 'monkey').setScale(0.2);
+    monkey = this.physics.add.sprite(100, 80, 'monkey').setScale(0.15);
     monkey.setCollideWorldBounds(true);
 
     ground = this.physics.add.staticGroup();
-    ground.create(400, 580, 'ground').setScale(2).refreshBody();
+
+    // Add thorns at multiple levels
+    addThorns(this, 580);
+    addThorns(this, 380);
+    addThorns(this, 180);
 
     vines = this.physics.add.group({
         immovable: true,
         allowGravity: false
     });
 
-    // Create vines across the screen
-    for (let i = 200; i < 800; i += 200) {
-        vines.create(i, 300, 'vine').setScale(0.5);
-    }
+    // Vines at the top of each level
+    addVines(this, 100);
+    addVines(this, 300);
+    addVines(this, 500);
 
     fruits = this.physics.add.group();
-    spawnFruit(this);
+    spawnFruits(this);
 
     this.physics.add.collider(monkey, ground, hitGround, null, this);
     this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
@@ -87,9 +91,27 @@ function update() {
     }
 }
 
-function spawnFruit(scene) {
-    for (let i = 250; i < 800; i += 200) {
-        let fruit = fruits.create(i, 200, 'fruit').setScale(0.1);
+function spawnFruits(scene) {
+    const fruitPositions = [
+        { x: 250, y: 50 }, { x: 550, y: 50 },
+        { x: 250, y: 250 }, { x: 550, y: 250 },
+        { x: 250, y: 450 }, { x: 550, y: 450 }
+    ];
+
+    fruitPositions.forEach(pos => {
+        fruits.create(pos.x, pos.y, 'banana').setScale(0.1);
+    });
+}
+
+function addThorns(scene, y) {
+    for (let x = 100; x <= 800; x += 200) {
+        ground.create(x, y, 'thorns').setScale(0.2).refreshBody();
+    }
+}
+
+function addVines(scene, y) {
+    for (let x = 150; x <= 800; x += 200) {
+        vines.create(x, y, 'vine').setScale(0.2);
     }
 }
 
@@ -99,7 +121,7 @@ function hitGround(monkey, ground) {
         alert('Game Over!');
         location.reload();
     } else {
-        monkey.setPosition(100, 450);
+        monkey.setPosition(100, 80);
     }
 }
 
