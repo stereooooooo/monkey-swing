@@ -48,7 +48,7 @@ function preload() {
 }
 
 function create() {
-    monkey = this.physics.add.sprite(100, 30, 'monkey').setScale(0.15);
+    monkey = this.physics.add.sprite(200, 50, 'monkey').setScale(0.15);
     monkey.setCollideWorldBounds(true);
 
     ground = this.physics.add.staticGroup();
@@ -58,10 +58,7 @@ function create() {
     addThorns(this, 380);
     addThorns(this, 180);
 
-    vines = this.physics.add.group({
-        immovable: true,
-        allowGravity: false
-    });
+    vines = this.physics.add.staticGroup();
 
     // Vines at the top of each level
     addVines(this, 100);
@@ -71,6 +68,7 @@ function create() {
     fruits = this.physics.add.group();
     spawnFruits(this);
 
+    this.physics.add.collider(monkey, vines); // Monkey can land on vines
     this.physics.add.collider(monkey, ground, hitGround, null, this);
     this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
 
@@ -92,16 +90,13 @@ function update() {
 }
 
 function spawnFruits(scene) {
-    // Bananas on vines
-    const fruitPositions = [
-        { x: 200, y: 80 }, { x: 500, y: 80 },
-        { x: 200, y: 280 }, { x: 500, y: 280 },
-        { x: 200, y: 480 }, { x: 500, y: 480 }
-    ];
-
-    fruitPositions.forEach(pos => {
-        fruits.create(pos.x, pos.y, 'banana').setScale(0.1);
-    });
+    // Bananas placed near vines
+    fruits.create(200, 80, 'banana').setScale(0.2);
+    fruits.create(500, 80, 'banana').setScale(0.2);
+    fruits.create(200, 280, 'banana').setScale(0.2);
+    fruits.create(500, 280, 'banana').setScale(0.2);
+    fruits.create(200, 480, 'banana').setScale(0.2);
+    fruits.create(500, 480, 'banana').setScale(0.2);
 }
 
 function addThorns(scene, y) {
@@ -122,7 +117,7 @@ function hitGround(monkey, ground) {
         alert('Game Over!');
         location.reload();
     } else {
-        monkey.setPosition(100, 30);
+        monkey.setPosition(200, 50);
     }
 }
 
@@ -133,7 +128,7 @@ function collectFruit(monkey, fruit) {
     // Check if all fruits are collected
     if (fruits.countActive(true) === 0) {
         alert('You Win! Welcome to the Treasure Room!');
-        // You could redirect to treasure room or load new scene here
+        // Replace with transition to treasure room later
     }
 }
 </script>
