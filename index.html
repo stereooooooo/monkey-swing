@@ -46,29 +46,29 @@ function preload() {
     this.load.image('vine', 'vine.png');
     this.load.image('banana', 'banana.png');
     this.load.image('thorns', 'thorns.png');
+    this.load.image('ground', 'ground.png');  // NEW ground graphic
 }
 
 function create() {
     monkey = this.physics.add.sprite(200, 50, 'monkey').setScale(0.15);
     monkey.setCollideWorldBounds(true);
 
-    // Platforms the monkey can land on
+    // Platforms made of real ground
     platforms = this.physics.add.staticGroup();
     addPlatforms(this);
 
-    // Thorns on top of the platforms
+    // Thorns on the ground
     thorns = this.physics.add.staticGroup();
     addThorns(this);
 
-    // Vines to swing from
     vines = this.physics.add.staticGroup();
     addVines(this);
 
     fruits = this.physics.add.group();
     spawnFruits(this);
 
-    this.physics.add.collider(monkey, platforms); // Monkey can land on platforms
-    this.physics.add.collider(monkey, thorns, hitThorns, null, this); // Monkey gets hurt by thorns
+    this.physics.add.collider(monkey, platforms); // Monkey can land
+    this.physics.add.collider(monkey, thorns, hitThorns, null, this); // Hit thorns
     this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
 
     cursors = this.input.keyboard.createCursorKeys();
@@ -89,17 +89,17 @@ function update() {
 }
 
 function addPlatforms(scene) {
-    // Add a platform at each level
-    platforms.create(400, 600, 'vine').setScale(40, 0.2).refreshBody(); // Bottom platform
-    platforms.create(400, 400, 'vine').setScale(40, 0.2).refreshBody(); // Middle platform
-    platforms.create(400, 200, 'vine').setScale(40, 0.2).refreshBody(); // Top platform
+    // Draw real ground at each level
+    scene.platforms.create(400, 580, 'ground').setScale(2, 0.5).refreshBody(); // bottom
+    scene.platforms.create(400, 380, 'ground').setScale(2, 0.5).refreshBody(); // middle
+    scene.platforms.create(400, 180, 'ground').setScale(2, 0.5).refreshBody(); // top
 }
 
 function addThorns(scene) {
-    // Thorns on each platform
-    placeThorns(scene, 600 - 20); // adjust 20px up to sit on platform
-    placeThorns(scene, 400 - 20);
-    placeThorns(scene, 200 - 20);
+    // Thorns sitting on ground — slight Y offset so it looks natural
+    placeThorns(scene, 580 - 50); // 50px up from platform
+    placeThorns(scene, 380 - 50);
+    placeThorns(scene, 180 - 50);
 }
 
 function placeThorns(scene, y) {
@@ -108,8 +108,8 @@ function placeThorns(scene, y) {
     }
 }
 
-function addVines(scene, y) {
-    // Vines near top of each level
+function addVines(scene) {
+    // Vines above ground level
     for (let y = 100; y <= 500; y += 200) {
         for (let x = 200; x <= 800; x += 300) {
             vines.create(x, y, 'vine').setScale(0.2);
@@ -142,7 +142,6 @@ function collectFruit(monkey, fruit) {
 
     if (fruits.countActive(true) === 0) {
         alert('You Win! Welcome to the Treasure Room!');
-        // Future: Show Treasure Room
     }
 }
 </script>
