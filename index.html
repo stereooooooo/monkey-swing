@@ -15,7 +15,7 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    backgroundColor: '#87CEEB',
+    backgroundColor: '#222', // Darker background to make everything pop
     physics: {
         default: 'arcade',
         arcade: {
@@ -46,18 +46,16 @@ function preload() {
     this.load.image('vine', 'vine.png');
     this.load.image('banana', 'banana.png');
     this.load.image('thorns', 'thorns.png');
-    this.load.image('ground', 'ground.png');  // NEW ground graphic
+    this.load.image('ground', 'ground.png');  // Ground graphic
 }
 
 function create() {
     monkey = this.physics.add.sprite(200, 50, 'monkey').setScale(0.15);
     monkey.setCollideWorldBounds(true);
 
-    // Platforms made of real ground
     platforms = this.physics.add.staticGroup();
     addPlatforms(this);
 
-    // Thorns on the ground
     thorns = this.physics.add.staticGroup();
     addThorns(this);
 
@@ -67,8 +65,8 @@ function create() {
     fruits = this.physics.add.group();
     spawnFruits(this);
 
-    this.physics.add.collider(monkey, platforms); // Monkey can land
-    this.physics.add.collider(monkey, thorns, hitThorns, null, this); // Hit thorns
+    this.physics.add.collider(monkey, platforms);
+    this.physics.add.collider(monkey, thorns, hitThorns, null, this);
     this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
 
     cursors = this.input.keyboard.createCursorKeys();
@@ -89,30 +87,27 @@ function update() {
 }
 
 function addPlatforms(scene) {
-    // Draw real ground at each level
-    scene.platforms.create(400, 580, 'ground').setScale(2, 0.5).refreshBody(); // bottom
-    scene.platforms.create(400, 380, 'ground').setScale(2, 0.5).refreshBody(); // middle
-    scene.platforms.create(400, 180, 'ground').setScale(2, 0.5).refreshBody(); // top
+    scene.platforms.create(400, 580, 'ground').refreshBody(); // bottom
+    scene.platforms.create(400, 380, 'ground').refreshBody(); // middle
+    scene.platforms.create(400, 180, 'ground').refreshBody(); // top
 }
 
 function addThorns(scene) {
-    // Thorns sitting on ground — slight Y offset so it looks natural
-    placeThorns(scene, 580 - 50); // 50px up from platform
+    placeThorns(scene, 580 - 50); 
     placeThorns(scene, 380 - 50);
     placeThorns(scene, 180 - 50);
 }
 
 function placeThorns(scene, y) {
     for (let x = 100; x <= 800; x += 200) {
-        thorns.create(x, y, 'thorns').setScale(0.5).refreshBody();
+        thorns.create(x, y, 'thorns').refreshBody(); // No scale
     }
 }
 
 function addVines(scene) {
-    // Vines above ground level
     for (let y = 100; y <= 500; y += 200) {
         for (let x = 200; x <= 800; x += 300) {
-            vines.create(x, y, 'vine').setScale(0.2);
+            vines.create(x, y, 'vine').setScale(0.2); // Vines still small
         }
     }
 }
