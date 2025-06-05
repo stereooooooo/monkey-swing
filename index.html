@@ -15,12 +15,12 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    backgroundColor: '#222', // Darker background to make everything pop
+    backgroundColor: '#222', // Darker background
     physics: {
         default: 'arcade',
         arcade: {
             gravity: { y: 800 },
-            debug: false
+            debug: false // Set to true to see physics bodies
         }
     },
     scene: {
@@ -35,18 +35,20 @@ let cursors;
 let vines;
 let fruits;
 let thorns;
-let platforms;
+let platforms; // Platforms are now separate from thorns
 let lives = 3;
 let score = 0;
 
 const game = new Phaser.Game(config);
 
 function preload() {
+    // Ensure these image files are in the same directory as your HTML file,
+    // or update the paths if they are in a subfolder (e.g., 'assets/monkey.png').
     this.load.image('monkey', 'monkey.png');
     this.load.image('vine', 'vine.png');
     this.load.image('banana', 'banana.png');
     this.load.image('thorns', 'thorns.png');
-    this.load.image('ground', 'ground.png');  // Ground graphic
+    this.load.image('ground', 'ground.png');  // For platforms
 }
 
 function create() {
@@ -54,20 +56,22 @@ function create() {
     monkey.setCollideWorldBounds(true);
 
     platforms = this.physics.add.staticGroup();
-    addPlatforms(this);
+    addPlatforms(this); // 'this' refers to the scene
 
     thorns = this.physics.add.staticGroup();
-    addThorns(this);
+    addThorns(this); // 'this' refers to the scene
 
     vines = this.physics.add.staticGroup();
-    addVines(this);
+    addVines(this); // 'this' refers to the scene
 
     fruits = this.physics.add.group();
-    spawnFruits(this);
+    spawnFruits(this); // 'this' refers to the scene
 
-    this.physics.add.collider(monkey, platforms);
-    this.physics.add.collider(monkey, thorns, hitThorns, null, this);
-    this.physics.add.overlap(monkey, fruits, collectFruit, null, this);
+    // Colliders
+    this.physics.add.collider(monkey, platforms); // Monkey can stand on platforms
+    this.physics.add.collider(monkey, vines);     // *** ADDED: Monkey can interact with vines ***
+    this.physics.add.collider(monkey, thorns, hitThorns, null, this); // Monkey hits thorns
+    this.physics.add.overlap(monkey, fruits, collectFruit, null, this); // Monkey collects fruit
 
     cursors = this.input.keyboard.createCursorKeys();
 }
@@ -86,38 +90,43 @@ function update() {
     }
 }
 
-function addPlatforms(scene) {
-    scene.platforms.create(400, 580, 'ground').refreshBody(); // bottom
-    scene.platforms.create(400, 380, 'ground').refreshBody(); // middle
-    scene.platforms.create(400, 180, 'ground').refreshBody(); // top
+function addPlatforms(scene) { // scene argument is good practice, though platforms is global here
+    // *** FIXED: Changed scene.platforms to platforms ***
+    platforms.create(400, 580, 'ground').refreshBody(); // bottom platform
+    platforms.create(400, 380, 'ground').refreshBody(); // middle platform
+    platforms.create(400, 180, 'ground').refreshBody(); // top platform
 }
 
-function addThorns(scene) {
-    placeThorns(scene, 580 - 50); 
-    placeThorns(scene, 380 - 50);
-    placeThorns(scene, 180 - 50);
+function addThorns(scene) { // scene argument is good practice
+    // Thorns are placed 50 pixels above the y-coordinate of the platforms.
+    // Example: Platform at y=180, thorns at y=130.
+    placeThorns(scene, 180 - 50); // Thorns above top platforms
+    placeThorns(scene, 380 - 50); // Thorns above middle platforms
+    placeThorns(scene, 580 - 50); // Thorns above bottom platforms
 }
 
-function placeThorns(scene, y) {
-    for (let x = 100; x <= 800; x += 200) {
-        thorns.create(x, y, 'thorns').refreshBody(); // No scale
+function placeThorns(scene, y) { // scene argument is good practice
+    for (let x = 100; x <= 700; x += 100) { // Adjusted loop for better coverage
+        thorns.create(x, y, 'thorns').refreshBody(); // Assuming thorns.png is pre-sized
     }
 }
 
-function addVines(scene) {
-    for (let y = 100; y <= 500; y += 200) {
-        for (let x = 200; x <= 800; x += 300) {
-            vines.create(x, y, 'vine').setScale(0.2); // Vines still small
+function addVines(scene) { // scene argument is good practice
+    for (let y = 100; y <= 500; y += 200) { // Levels of vines
+        for (let x = 200; x <= 600; x += 200) { // Vines across the level, adjusted spacing
+            // *** FIXED: Added .refreshBody() to vines after scaling ***
+            vines.create(x, y, 'vine').setScale(0.2).refreshBody();
         }
     }
 }
 
-function spawnFruits(scene) {
-    fruits.create(200, 80, 'banana').setScale(0.2);
+function spawnFruits(scene) { // scene argument is good practice
+    // Fruits slightly above the vine levels
+    fruits.create(200, 80, 'banana').setScale(0.2);  // For vines at y=100
     fruits.create(500, 80, 'banana').setScale(0.2);
-    fruits.create(200, 280, 'banana').setScale(0.2);
+    fruits.create(200, 280, 'banana').setScale(0.2); // For vines at y=300
     fruits.create(500, 280, 'banana').setScale(0.2);
-    fruits.create(200, 480, 'banana').setScale(0.2);
+    fruits.create(200, 480, 'banana').setScale(0.2); // For vines at y=500
     fruits.create(500, 480, 'banana').setScale(0.2);
 }
 
@@ -125,9 +134,10 @@ function hitThorns(monkey, thorn) {
     lives--;
     if (lives <= 0) {
         alert('Game Over!');
-        location.reload();
+        location.reload(); // Or: scene.scene.restart(); for a cleaner restart within Phaser
     } else {
-        monkey.setPosition(200, 50);
+        monkey.setPosition(200, 50); // Reset to starting position
+        monkey.setVelocity(0, 0);     // Stop any existing movement
     }
 }
 
@@ -137,6 +147,8 @@ function collectFruit(monkey, fruit) {
 
     if (fruits.countActive(true) === 0) {
         alert('You Win! Welcome to the Treasure Room!');
+        // Here you would typically transition to another scene or level
+        // location.reload(); // For now, reloads the game
     }
 }
 </script>
