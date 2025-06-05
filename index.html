@@ -48,7 +48,7 @@ function preload() {
 }
 
 function create() {
-    monkey = this.physics.add.sprite(100, 80, 'monkey').setScale(0.15);
+    monkey = this.physics.add.sprite(100, 30, 'monkey').setScale(0.15);
     monkey.setCollideWorldBounds(true);
 
     ground = this.physics.add.staticGroup();
@@ -92,10 +92,11 @@ function update() {
 }
 
 function spawnFruits(scene) {
+    // Bananas on vines
     const fruitPositions = [
-        { x: 250, y: 50 }, { x: 550, y: 50 },
-        { x: 250, y: 250 }, { x: 550, y: 250 },
-        { x: 250, y: 450 }, { x: 550, y: 450 }
+        { x: 200, y: 80 }, { x: 500, y: 80 },
+        { x: 200, y: 280 }, { x: 500, y: 280 },
+        { x: 200, y: 480 }, { x: 500, y: 480 }
     ];
 
     fruitPositions.forEach(pos => {
@@ -105,12 +106,12 @@ function spawnFruits(scene) {
 
 function addThorns(scene, y) {
     for (let x = 100; x <= 800; x += 200) {
-        ground.create(x, y, 'thorns').setScale(0.2).refreshBody();
+        ground.create(x, y, 'thorns').setScale(0.5).refreshBody();
     }
 }
 
 function addVines(scene, y) {
-    for (let x = 150; x <= 800; x += 200) {
+    for (let x = 200; x <= 800; x += 300) {
         vines.create(x, y, 'vine').setScale(0.2);
     }
 }
@@ -121,13 +122,19 @@ function hitGround(monkey, ground) {
         alert('Game Over!');
         location.reload();
     } else {
-        monkey.setPosition(100, 80);
+        monkey.setPosition(100, 30);
     }
 }
 
 function collectFruit(monkey, fruit) {
     fruit.disableBody(true, true);
     score += 10;
+
+    // Check if all fruits are collected
+    if (fruits.countActive(true) === 0) {
+        alert('You Win! Welcome to the Treasure Room!');
+        // You could redirect to treasure room or load new scene here
+    }
 }
 </script>
 </body>
