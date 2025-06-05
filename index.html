@@ -15,7 +15,7 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
-    backgroundColor: '#87CEEB', // sky blue background
+    backgroundColor: '#87CEEB', // sky blue
     physics: {
         default: 'arcade',
         arcade: {
@@ -87,38 +87,38 @@ function update() {
 }
 
 function addPlatforms(scene) {
-    scene.platforms.create(400, 580, 'ground').setScale(0.5).refreshBody(); // bottom
-    scene.platforms.create(400, 380, 'ground').setScale(0.5).refreshBody(); // middle
-    scene.platforms.create(400, 180, 'ground').setScale(0.5).refreshBody(); // top
+    scene.platforms.create(400, 580, 'ground').setDisplaySize(800, 40).refreshBody(); // bottom
+    scene.platforms.create(400, 380, 'ground').setDisplaySize(800, 40).refreshBody(); // middle
+    scene.platforms.create(400, 180, 'ground').setDisplaySize(800, 40).refreshBody(); // top
 }
 
 function addThorns(scene) {
-    placeThorns(scene, 580 - 60); // 60px up to rest on platform
+    placeThorns(scene, 580 - 60);
     placeThorns(scene, 380 - 60);
     placeThorns(scene, 180 - 60);
 }
 
 function placeThorns(scene, y) {
     for (let x = 100; x <= 800; x += 200) {
-        thorns.create(x, y, 'thorns').setScale(0.15).refreshBody(); // smaller thorns
+        thorns.create(x, y, 'thorns').setDisplaySize(50, 50).refreshBody();
     }
 }
 
 function addVines(scene) {
     for (let y = 100; y <= 500; y += 200) {
         for (let x = 200; x <= 800; x += 300) {
-            vines.create(x, y, 'vine').setScale(0.2); // vines okay at 0.2
+            vines.create(x, y, 'vine').setScale(0.2); // Vines are fine with scale
         }
     }
 }
 
 function spawnFruits(scene) {
-    fruits.create(200, 80, 'banana').setScale(0.08); // smaller bananas
-    fruits.create(500, 80, 'banana').setScale(0.08);
-    fruits.create(200, 280, 'banana').setScale(0.08);
-    fruits.create(500, 280, 'banana').setScale(0.08);
-    fruits.create(200, 480, 'banana').setScale(0.08);
-    fruits.create(500, 480, 'banana').setScale(0.08);
+    fruits.create(200, 80, 'banana').setDisplaySize(30, 30);
+    fruits.create(500, 80, 'banana').setDisplaySize(30, 30);
+    fruits.create(200, 280, 'banana').setDisplaySize(30, 30);
+    fruits.create(500, 280, 'banana').setDisplaySize(30, 30);
+    fruits.create(200, 480, 'banana').setDisplaySize(30, 30);
+    fruits.create(500, 480, 'banana').setDisplaySize(30, 30);
 }
 
 function hitThorns(monkey, thorn) {
